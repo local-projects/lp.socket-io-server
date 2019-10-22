@@ -10,7 +10,7 @@ Socket.io generic server
     $ npm start
 
 ### usage
-##### initialization
+### initialization
 ```csharp
 SocketOptions options = new SocketOptions();
 options.AutoConnect = true;
@@ -21,7 +21,7 @@ Manager.Socket.On("chatMessage", OnChatMessage);
 Manager.Open();
 ```
 
-##### handlers
+### handlers
 ```csharp
 Manager.Socket.On(SocketIOEventTypes.Error, (socket, packet, args) => Debug.LogError(string.Format("Error: {0}", args[0].ToString())));
 Manager.Socket.On(SocketIOEventTypes.Connect, (socket, packet, args) => SetUserName());
@@ -54,7 +54,7 @@ void OnServerUpdate(Socket socket, Packet packet, params object[] args)
         }
 ```
 
-##### send data
+### send data
 ```csharp
  IEnumerator SendFrame(float waitTime)
     {
