@@ -1,0 +1,26 @@
+{
+	"name": "socket.io-chat",
+	"version": "0.0.0",
+	"description": "A simple chat client using socket.io",
+	"main": "index.js",
+	"bin": "index.js",
+	"author": "Grant Timmerman",
+	"private": true,
+	"license": "BSD",
+	"dependencies": {
+		"express": "4.13.4",
+		"pkg": "^4.4.0",
+		"socket.io": "^2.3.0",
+		"socketio-wildcard": "^2.0.0"
+	},
+	"scripts": {
+		"prestart": "npm install",
+		"start": "node index.js",
+		"pack": "pkg ."
+	},
+	"pkg": {
+		"targets": [
+			"node10"
+		]
+	}
+}
