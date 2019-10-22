@@ -6,8 +6,8 @@ Socket.io generic server
     $ cd SocketioGenericServer
     $ npm install
     $ npm install socket.io
-	$ npm install pkg
-    $ npm start`
+    $ npm install pkg
+    $ npm start
 
 ### usage
 ##### initialization
