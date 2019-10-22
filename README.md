@@ -1,7 +1,7 @@
 ## SocketioGenericServer
 Socket.io generic server
 
-###Install
+### Install
 
     $ cd SocketioGenericServer
     $ npm install
@@ -9,8 +9,8 @@ Socket.io generic server
 	$ npm install pkg
     $ npm start`
 
-###usage
-#####initialization
+### usage
+##### initialization
 ```csharp
 SocketOptions options = new SocketOptions();
 options.AutoConnect = true;
@@ -21,7 +21,7 @@ Manager.Socket.On("chatMessage", OnChatMessage);
 Manager.Open();
 ```
 
-#####handlers
+##### handlers
 ```csharp
 Manager.Socket.On(SocketIOEventTypes.Error, (socket, packet, args) => Debug.LogError(string.Format("Error: {0}", args[0].ToString())));
 Manager.Socket.On(SocketIOEventTypes.Connect, (socket, packet, args) => SetUserName());
@@ -54,7 +54,7 @@ void OnServerUpdate(Socket socket, Packet packet, params object[] args)
         }
 ```
 
-#####send data
+##### send data
 ```csharp
  IEnumerator SendFrame(float waitTime)
     {
@@ -80,12 +80,12 @@ void OnServerUpdate(Socket socket, Packet packet, params object[] args)
     }
 ```
 
-###package
+### package
 Package in to an exe. OSX and Linux are available but need to be configures in package.json
 
 `$ pkg .`
 
-###BlacklistedEvents
+### BlacklistedEvents
 Some events are blacklisted because they are used by the low level server.
 
 - "connect"
