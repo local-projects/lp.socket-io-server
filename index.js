@@ -6,7 +6,7 @@ var os = require("os");
 var server = require('http').createServer(app);
 var io = require('socket.io')(server, { serveClient: true })
 //var io = require('../..')(server);
-var port = process.env.PORT || 8080;
+var port = process.env.PORT || 3000;
 
 server.listen(port, () => {
   console.log('Server listening at: ');
@@ -73,7 +73,7 @@ io.sockets.on('connection', function (socket) {
 			users: usersByRooms[socket.room]
 		});
 
-		 console.log('just logged in, users in '+room+': '+Object.keys(usersByRooms[room]).length );
+		 console.log('just logged in '+username+', users in '+room+': '+Object.keys(usersByRooms[room]).length );
 	});
 
 	socket.on('sendmessage', function (cmd, data) {
@@ -85,14 +85,24 @@ io.sockets.on('connection', function (socket) {
 
 
 	socket.on('disconnect', function(){
+		
+		try	{
 		delete usersByRooms[socket.room][socket.id];
 
-		for (var k in usersByRooms) {
-			if(k.length<1){
+		for (var k in usersByRooms) 
+		{
+			if(k.length<1)
+			{
 				delete rooms[k];
 				delete k;
 			}
 		}
+		
+		
+		
+		console.log('just logged out '+socket.username+', users in '+room+': '+Object.keys(usersByRooms[room]).length );
+
+
 
 		socket.emit('serverupdate', {
 			type:'userleft',
@@ -111,5 +121,10 @@ io.sockets.on('connection', function (socket) {
 		});
 
 		socket.leave(socket.room);
+		}catch(error)
+		{
+		console.log('error disconnecting, somebody didnt subscribe' );
+
+		}
 	});
 });
