@@ -52,6 +52,12 @@ void OnServerUpdate(Socket socket, Packet packet, params object[] args)
 
             Debug.Log(response);
         }
+        
+          void SetUserName()
+    {
+        Manager.Socket.Emit("adduser", NodeName, NodeRoom);
+    }
+
 ```
 
 ### send data
