@@ -11,7 +11,7 @@ Socket.io generic server
 
 ### usage
 ### initialization
-```csharp
+```Unity/csharp
 SocketOptions options = new SocketOptions();
 options.AutoConnect = true;
 options.ConnectWith = BestHTTP.SocketIO.Transports.TransportTypes.WebSocket;
@@ -22,7 +22,7 @@ Manager.Open();
 ```
 
 ### handlers
-```csharp
+```Unity/csharp
 Manager.Socket.On(SocketIOEventTypes.Error, (socket, packet, args) => Debug.LogError(string.Format("Error: {0}", args[0].ToString())));
 Manager.Socket.On(SocketIOEventTypes.Connect, (socket, packet, args) => SetUserName());
 
@@ -61,7 +61,7 @@ void OnServerUpdate(Socket socket, Packet packet, params object[] args)
 ```
 
 ### send data
-```csharp
+```Unity/csharp
  IEnumerator SendFrame(float waitTime)
     {
         while (DoSendFrameData) { 

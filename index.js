@@ -5,11 +5,24 @@ var path = require('path');
 var os = require("os");
 var server = require('http').createServer(app);
 var io = require('socket.io')(server, { serveClient: true })
-//var io = require('../..')(server);
 var port = process.env.PORT || 3000;
+const myLoggers = require('log4js');
+
+//setup logger
+myLoggers.configure({
+    appenders: { mylogger: { type: "file", filename: "logs/log.txt" } },
+    categories: { default: { appenders: ["mylogger"], level: "ALL" } }
+});
+const logger = myLoggers.getLogger("default");
+
+//logger function to write to both the console and the log4JS logger
+function log(message) {
+    console.log(message);
+    logger.info(message);
+}
 
 server.listen(port, () => {
-  console.log('Server listening at: ');
+    log('server started');
 
   var interfaces = os.networkInterfaces();
 var addresses = [];
@@ -24,7 +37,7 @@ var addresses = [];
 
 for (var _i = 0, addresses_1 = addresses; _i < addresses_1.length; _i++) {
 	var address = addresses_1[_i];
-        console.log("http://" + address + ":" + port);
+    log("http://" + address + ":" + port);
 }
 });
 
@@ -39,8 +52,7 @@ io.sockets.on('connection', function (socket) {
 	
 	socket.on('adduser', function(username, room){
 		socket.username = username;
-		socket.room = room;
-		
+        socket.room = room;
 
 		if(!usersByRooms.hasOwnProperty(room)){
 			usersByRooms[room]={};
@@ -73,7 +85,7 @@ io.sockets.on('connection', function (socket) {
 			users: usersByRooms[socket.room]
 		});
 
-		 console.log('just logged in '+username+', users in '+room+': '+Object.keys(usersByRooms[room]).length );
+		 log('just logged in '+username+', users in '+room+': '+Object.keys(usersByRooms[room]).length );
 	});
 
 	socket.on('sendmessage', function (cmd, data) {
@@ -85,7 +97,6 @@ io.sockets.on('connection', function (socket) {
 
 
 	socket.on('disconnect', function(){
-		
 		try	{
 		delete usersByRooms[socket.room][socket.id];
 
@@ -98,11 +109,7 @@ io.sockets.on('connection', function (socket) {
 			}
 		}
 		
-		
-		
-		console.log('just logged out '+socket.username+', users in '+room+': '+Object.keys(usersByRooms[room]).length );
-
-
+		log('just logged out '+socket.username+', users in '+room+': '+Object.keys(usersByRooms[room]).length );
 
 		socket.emit('serverupdate', {
 			type:'userleft',
@@ -123,7 +130,7 @@ io.sockets.on('connection', function (socket) {
 		socket.leave(socket.room);
 		}catch(error)
 		{
-		console.log('error disconnecting, somebody didnt subscribe' );
+		log('error disconnecting, something did not subscribe' );
 
 		}
 	});
