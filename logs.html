@@ -1,0 +1,99 @@
+﻿<html style="height: 100%">
+    <head>
+        <title>Logs</title>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+        <script>
+            var socket = io.connect("http://localhost:3000");
+            var logfile = "log.txt";
+            var bScrollToBottom = true;
+
+            socket.on("connect", function() {
+                socket.emit("addlogwatcher");
+                loadLogs();
+            });
+
+            socket.on("newlog", loadLogs);
+
+            function loadLogs() {
+                $.ajax({
+                    url: logfile,
+                    dataType: "text",
+                    success: function(data) {
+                        $("#logs")
+                            .html(data)
+                            .append("<br />");
+                        bScrollToBottom ? scrollToBottom() : null;
+                    }
+                });
+            }
+
+            function scrollToBottom() {
+                $("#logs").animate(
+                    { scrollTop: $("#logs").prop("scrollHeight") },
+                    500 // scroll speed
+                );
+            }
+
+            // on load of page
+            $(function() {
+                // Switch between current session and all sessions
+                $("#switchLink").click(function() {
+                    if (logfile === "log.txt") {
+                        logfile = "log_history.txt";
+                        $("#switch").text("the current server session");
+                        $("#which").text("all sessions");
+                    } else {
+                        logfile = "log.txt";
+                        $("#switch").text("all sessions");
+                        $("#which").text("the current server session");
+                    }
+
+                    loadLogs();
+                });
+
+                // Set up automatic scroll checkbox
+                $("#scrollToBottom")
+                    .change(function() {
+                        bScrollToBottom = this.checked;
+                    })
+                    .prop("checked", true);
+
+                // Handle resizing of "logs" div so that everything always fits on one page
+                var resizeLogsDiv = function() {
+                    $("#logs").height(
+                        $(window).height() - $("#header").height() - 30
+                    );
+                };
+                $(window).ready(resizeLogsDiv);
+                $(window).bind("resize", resizeLogsDiv);
+            });
+        </script>
+    </head>
+
+    <body style="height: 100%; overflow: hidden;">
+        <div id="header">
+            <h2>LP Socket.IO Server Logs</h2>
+
+            <div style="font-size: 24px;">
+                Showing logs from <b id="which">the current server session</b>:
+            </div>
+            <a id="switchLink" href="javascript:void(0);">Switch</a> to logs
+            from <b id="switch">all sessions</b>
+            <br />
+            <br />
+
+            <input type="checkbox" id="scrollToBottom" />
+            Automatically scroll to bottom whenever there is a new log posted
+        </div>
+
+        <div
+            id="logs"
+            style="white-space: pre;
+                    font-family: 'Lucida Console', Monaco, monospace;
+                    background-color: black;
+                    color: white;
+                    overflow: scroll;"
+        ></div>
+    </body>
+</html>
