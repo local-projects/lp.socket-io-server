@@ -140,9 +140,9 @@ io.sockets.on("connection", function(socket) {
                 "just logged out " +
                     socket.username +
                     ", users in " +
-                    room +
+                    socket.room +
                     ": " +
-                    Object.keys(usersByRooms[room]).length
+                    Object.keys(usersByRooms[socket.room]).length
             );
 
             socket.emit("serverupdate", {
@@ -163,6 +163,7 @@ io.sockets.on("connection", function(socket) {
 
             socket.leave(socket.room);
         } catch (error) {
+            log(error);
             log("error disconnecting, something did not subscribe");
         }
     });
