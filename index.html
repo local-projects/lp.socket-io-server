@@ -50,20 +50,20 @@
                 });
             });
 
-            socket.on("userjoined", function(username) {
-                $("#conversation").append(
-                    "<font color='#888'><b>" +
-                        username +
-                        "</b> joined the room.<br />"
-                );
-            });
-
-            socket.on("userleft", function(username) {
-                $("#conversation").append(
-                    "<font color='#888'><b>" +
-                        username +
-                        "</b> left the room.<br />"
-                );
+            socket.on("serverupdate", function(update) {
+                if (update.type === "userjoined") {
+                    $("#conversation").append(
+                        "<font color='#888'><b>" +
+                            update.username +
+                            "</b> joined the room.<br />"
+                    );
+                } else if (update.type === "userleft") {
+                    $("#conversation").append(
+                        "<font color='#888'><b>" +
+                            update.username +
+                            "</b> left the room.<br />"
+                    );
+                }
             });
 
             function switchRoom(room) {

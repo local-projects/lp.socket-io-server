@@ -72,6 +72,7 @@ io.sockets.on("connection", function(socket) {
     });
 
     socket.on("adduser", function(username, room) {
+        log("add user: " + username + ", " + room);
         socket.username = username;
         socket.join(room, function(err) {
             handleJoinRoom(socket, room, err);
@@ -92,6 +93,26 @@ io.sockets.on("connection", function(socket) {
                     handleJoinRoom(socket, room, err);
                 });
             }
+        });
+    });
+
+    // For generic messaging capabilities
+    socket.on("sendmessage", function(cmd, data) {
+        log(
+            "User '" +
+                socket.username +
+                "' is sending a message to room '" +
+                socket.room +
+                "'..."
+        );
+        log("Message");
+        log("-------");
+        log("cmd: " + cmd);
+        log("data: " + data);
+
+        socket.broadcast.to(socket.room).emit(cmd, {
+            username: socket.username,
+            data: data
         });
     });
 
@@ -129,7 +150,13 @@ function handleJoinRoom(socket, room, err) {
     }
     usersByRooms[room][socket.id] = socket.username;
 
-    io.to(socket.room).emit("userjoined", socket.username);
+    io.to(socket.room).emit("serverupdate", {
+        type: "userjoined",
+        username: socket.username,
+        room: socket.room,
+        rooms: rooms,
+        users: usersByRooms[socket.room]
+    });
 
     log(
         "Successfully added user '" +
@@ -155,7 +182,13 @@ function handleLeaveRoom(socket, err) {
     }
     delete usersByRooms[socket.room][socket.id];
 
-    io.to(socket.room).emit("userleft", socket.username);
+    io.to(socket.room).emit("serverupdate", {
+        type: "userleft",
+        username: socket.username,
+        room: socket.room,
+        rooms: rooms,
+        users: usersByRooms[socket.room]
+    });
 
     log(
         "Successfully removed user '" +
