@@ -61,7 +61,10 @@ var usersByRooms = {};
 var rooms = [];
 var numLogWatchers = 0; // in case it is ever useful to know
 
+// Socket event handlers
 io.sockets.on("connection", function(socket) {
+    log("New connection!");
+
     // Register client as log watcher
     socket.on("addlogwatcher", function() {
         socket.isLogWatcher = true;
@@ -69,51 +72,44 @@ io.sockets.on("connection", function(socket) {
     });
 
     socket.on("adduser", function(username, room) {
+        log("add user: " + username + ", " + room);
         socket.username = username;
-        socket.room = room;
-
-        if (!usersByRooms.hasOwnProperty(room)) {
-            usersByRooms[room] = {};
-            rooms.push(room);
-        }
-        usersByRooms[room][socket.id] = username;
-
-        for (var k in usersByRooms) {
-            if (k.length < 1) {
-                delete rooms[k];
-                delete k;
-            }
-        }
-
-        socket.join(room);
-
-        socket.emit("serverupdate", {
-            type: "userjoined",
-            username: socket.username,
-            room: socket.room,
-            rooms: rooms,
-            users: usersByRooms[socket.room]
+        socket.join(room, function(err) {
+            handleJoinRoom(socket, room, err);
         });
-
-        socket.broadcast.to(socket.room).emit("serverupdate", {
-            type: "userjoined",
-            username: socket.username,
-            room: socket.room,
-            rooms: rooms,
-            users: usersByRooms[socket.room]
-        });
-
-        log(
-            "just logged in " +
-                username +
-                ", users in " +
-                room +
-                ": " +
-                Object.keys(usersByRooms[room]).length
-        );
     });
 
+    socket.on("sendchat", function(data) {
+        io.to(socket.room).emit("updatechat", {
+            username: socket.username,
+            data: data
+        });
+    });
+
+    socket.on("switchroom", function(room) {
+        socket.leave(socket.room, function(err) {
+            if (handleLeaveRoom(socket, err)) {
+                socket.join(room, function(err) {
+                    handleJoinRoom(socket, room, err);
+                });
+            }
+        });
+    });
+
+    // For generic messaging capabilities
     socket.on("sendmessage", function(cmd, data) {
+        log(
+            "User '" +
+                socket.username +
+                "' is sending a message to room '" +
+                socket.room +
+                "'..."
+        );
+        log("Message");
+        log("-------");
+        log("cmd: " + cmd);
+        log("data: " + data);
+
         socket.broadcast.to(socket.room).emit(cmd, {
             username: socket.username,
             data: data
@@ -127,44 +123,111 @@ io.sockets.on("connection", function(socket) {
         }
 
         try {
-            delete usersByRooms[socket.room][socket.id];
-
-            for (var k in usersByRooms) {
-                if (k.length < 1) {
-                    delete rooms[k];
-                    delete k;
-                }
-            }
-
-            log(
-                "just logged out " +
-                    socket.username +
-                    ", users in " +
-                    socket.room +
-                    ": " +
-                    Object.keys(usersByRooms[socket.room]).length
-            );
-
-            socket.emit("serverupdate", {
-                type: "userleft",
-                username: socket.username,
-                room: socket.room,
-                rooms: rooms,
-                users: usersByRooms[socket.room]
-            });
-
-            socket.broadcast.to(socket.room).emit("serverupdate", {
-                type: "userleft",
-                username: socket.username,
-                room: socket.room,
-                rooms: rooms,
-                users: usersByRooms[socket.room]
-            });
-
-            socket.leave(socket.room);
+            log("User '" + socket.username + "' disconnected");
+            handleLeaveRoom(socket);
         } catch (error) {
-            log(error);
-            log("error disconnecting, something did not subscribe");
+            log(
+                "Error disconnecting: something did not subscribe. Most likely, someone closed the chat window without logging in."
+            );
         }
     });
 });
+
+// Helper functions
+function handleJoinRoom(socket, room, err) {
+    if (err) {
+        console.log(
+            "Error adding '" + socket.username + "' to room '" + room + "': ",
+            err
+        );
+        return false;
+    }
+    socket.room = room;
+
+    if (!usersByRooms.hasOwnProperty(room)) {
+        usersByRooms[room] = {};
+        rooms.push(room);
+    }
+    usersByRooms[room][socket.id] = socket.username;
+
+    io.to(socket.room).emit("serverupdate", {
+        type: "userjoined",
+        username: socket.username,
+        room: socket.room,
+        rooms: rooms,
+        users: usersByRooms[socket.room]
+    });
+
+    log(
+        "Successfully added user '" +
+            socket.username +
+            "' to room '" +
+            socket.room +
+            "'."
+    );
+
+    logSocketRoomInfo(socket);
+    updateRoomsAndNotifyEveryone();
+
+    return true;
+}
+
+function handleLeaveRoom(socket, err) {
+    if (err) {
+        console.log(
+            "Error removing '" + username + "' from room '" + room + "': ",
+            err
+        );
+        return false;
+    }
+    delete usersByRooms[socket.room][socket.id];
+
+    io.to(socket.room).emit("serverupdate", {
+        type: "userleft",
+        username: socket.username,
+        room: socket.room,
+        rooms: rooms,
+        users: usersByRooms[socket.room]
+    });
+
+    log(
+        "Successfully removed user '" +
+            socket.username +
+            "' from room '" +
+            socket.room +
+            "'."
+    );
+
+    logSocketRoomInfo(socket);
+    updateRoomsAndNotifyEveryone(socket);
+
+    return true;
+}
+
+function updateRoomsAndNotifyEveryone() {
+    // Keep 'rooms' and 'usersByRoom' up to date
+    Object.keys(usersByRooms).forEach(r => {
+        if (Object.keys(usersByRooms[r]).length < 1) {
+            rooms = rooms.filter(room => room != r);
+            delete usersByRooms[r];
+        }
+    });
+
+    // Let each socket which room it is in,
+    // as well as other available rooms
+    Object.values(io.sockets.connected).forEach(s =>
+        s.emit("updaterooms", {
+            current_room: s.room,
+            rooms: rooms
+        })
+    );
+}
+
+function logSocketRoomInfo(socket) {
+    log(
+        "Number of users in room '" +
+            socket.room +
+            "': " +
+            Object.keys(usersByRooms[socket.room]).length
+    );
+}
