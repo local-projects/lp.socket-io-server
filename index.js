@@ -63,7 +63,7 @@ var numLogWatchers = 0; // in case it is ever useful to know
 
 // Socket event handlers
 io.sockets.on("connection", function(socket) {
-    log("New connection!");
+    log("new socket.io client connected");
 
     // Register client as log watcher
     socket.on("addlogwatcher", function() {
@@ -108,7 +108,7 @@ io.sockets.on("connection", function(socket) {
         log("Message");
         log("-------");
         log("cmd: " + cmd);
-        log("data: " + data);
+        log("data: " + (data.length < 20 ? data : data.slice(0, 20) + "...")); // truncate data if very long
 
         socket.broadcast.to(socket.room).emit(cmd, {
             username: socket.username,
