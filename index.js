@@ -3,9 +3,11 @@ var express = require("express");
 var app = express();
 var path = require("path");
 var os = require("os");
-var server = require("http").createServer(app);
-var io = require("socket.io")(server, { serveClient: true });
-var port = process.env.PORT || 3000;
+var socket_io_server = require("http").createServer(app);
+var io = require("socket.io")(socket_io_server, { serveClient: true });
+var net = require("net");
+var socket_io_port = process.env.PORT || process.env.SOCKET_IO_PORT || 3000;
+var tcp_socket_port = process.env.TCP_SOCKET_PORT || 13037;
 const myLoggers = require("log4js");
 
 //setup logger
@@ -27,9 +29,43 @@ function log(message) {
     io.sockets.emit("newlog"); // alert all watchers
 }
 
-server.listen(port, () => {
-    log("server started");
+var tcp_socket_server = net.createServer(socket => {
+    log("new tcp socket client connected");
 
+    socket.on("data", cmd => {
+        log(
+            "command received on tcp socket: " +
+                (cmd.length < 20 ? cmd : cmd.slice(0, 20) + "...")
+        ); // truncate cmd if very long
+
+        log("broadcasting command to all socket.io clients...");
+        io.emit(cmd);
+
+        // send ACK back to client
+        socket.write("ACK\r");
+    });
+
+    socket.on("close", hadError => {
+        log(
+            "tcp socket client disconnected " +
+                (hadError ? "WITH AN ERROR" : "successfully")
+        );
+    });
+});
+
+tcp_socket_server.listen({ port: tcp_socket_port }, () => {
+    log("tcp socket server started");
+
+    logServerInfo(tcp_socket_port);
+});
+
+socket_io_server.listen(socket_io_port, () => {
+    log("socket.io server started");
+
+    logServerInfo(socket_io_port);
+});
+
+function logServerInfo(port) {
     var interfaces = os.networkInterfaces();
     var addresses = [];
     for (var k in interfaces) {
@@ -45,7 +81,7 @@ server.listen(port, () => {
         var address = addresses_1[_i];
         log("http://" + address + ":" + port);
     }
-});
+}
 
 app.get("/", function(req, res) {
     res.sendFile(path.join(__dirname, "index.html"));
