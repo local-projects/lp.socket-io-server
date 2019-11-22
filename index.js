@@ -7,7 +7,7 @@ var socket_io_server = require("http").createServer(app);
 var io = require("socket.io")(socket_io_server, { serveClient: true });
 var net = require("net");
 var socket_io_port = process.env.PORT || process.env.SOCKET_IO_PORT || 3000;
-var tcp_socket_port = process.env.TCP_SOCKET_PORT || 13037;
+var tcp_socket_port = process.env.TCP_SOCKET_PORT || 4000;
 const myLoggers = require("log4js");
 
 //setup logger
