@@ -29,6 +29,13 @@ function log(message) {
     io.sockets.emit("newlog"); // alert all watchers
 }
 
+// Log to signal server startup
+log("");
+log("*****LP SocketIO Server*****");
+log("Date and Time of server startup:");
+log(new Date().toString());
+log("");
+
 var tcp_socket_server = net.createServer(socket => {
     log("new tcp socket client connected");
 
@@ -91,6 +98,11 @@ app.get("/", function(req, res) {
 app.use("/logs", express.static(path.join(__dirname, "logs")));
 app.get("/logs", function(req, res) {
     res.sendFile(path.join(__dirname, "logs.html"));
+});
+
+// Backdoor to crash the server for testing purposes
+app.get("/iamsurethatiwanttocrashtheserver", function(req, res) {
+    process.exit(1);
 });
 
 var usersByRooms = {};
