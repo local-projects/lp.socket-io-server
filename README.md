@@ -1,5 +1,5 @@
-# SocketioGenericServer
-Socket.io server for sending and receiving generic "commmands" with data arguments.
+# Generic Socket.io Server
+Socket.io server for sending and receiving generic "commmands" with data arguments. Also contains basic functionality for interfacing via TCP.
 
 ## Install and run
 
@@ -17,7 +17,12 @@ and then run, configure and manage the service just as you would any other servi
     $ npm run uninstall-windows-service
 
 ## Usage
+### Port configuration
+The Socket.io port defaults to `3000` and the TCP Socket port defaults to `4000`. You can customize these with the `$SOCKET_IO_PORT` and `$TCP_SOCKET_PORT` environment variables, respectively.
+
 ### Initialization
+Example in Unity/C\#:
+
 ```Unity/csharp
 SocketOptions options = new SocketOptions();
 options.AutoConnect = true;
@@ -29,6 +34,8 @@ Manager.Open();
 ```
 
 ### Handlers
+Example in Unity/C\#:
+
 ```Unity/csharp
 Manager.Socket.On(SocketIOEventTypes.Error, (socket, packet, args) => Debug.LogError(string.Format("Error: {0}", args[0].ToString())));
 Manager.Socket.On(SocketIOEventTypes.Connect, (socket, packet, args) => SetUserName());
@@ -68,6 +75,8 @@ void OnServerUpdate(Socket socket, Packet packet, params object[] args)
 ```
 
 ### Send data
+Example in Unity/C\#:
+
 ```Unity/csharp
  IEnumerator SendFrame(float waitTime)
     {
@@ -93,7 +102,7 @@ void OnServerUpdate(Socket socket, Packet packet, params object[] args)
     }
 ```
 
-### Package
+### Packaging
 Package in to an exe. OSX and Linux are available but need to be configured in package.json
 
 `$ pkg .`
