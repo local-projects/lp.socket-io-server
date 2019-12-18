@@ -1,16 +1,23 @@
-## SocketioGenericServer
-Socket.io generic server
+# SocketioGenericServer
+Socket.io server for sending and receiving generic "commmands" with data arguments.
 
-### Install
+## Install and run
 
-    $ cd SocketioGenericServer
+    $ cd lp.socket-io-server
     $ npm install
-    $ npm install socket.io
-    $ npm install pkg
     $ npm start
 
-### usage
-### initialization
+On Windows, you can choose to install the server as a service (via the [winser](http://jfromaniello.github.io/winser/) package using [nssm](https://nssm.cc/)) with:
+
+    $ npm install
+    $ npm run install-windows-service
+
+and then run, configure and manage the service just as you would any other service. To uninstall the service:
+
+    $ npm run uninstall-windows-service
+
+## Usage
+### Initialization
 ```Unity/csharp
 SocketOptions options = new SocketOptions();
 options.AutoConnect = true;
@@ -21,7 +28,7 @@ Manager.Socket.On("chatMessage", OnChatMessage);
 Manager.Open();
 ```
 
-### handlers
+### Handlers
 ```Unity/csharp
 Manager.Socket.On(SocketIOEventTypes.Error, (socket, packet, args) => Debug.LogError(string.Format("Error: {0}", args[0].ToString())));
 Manager.Socket.On(SocketIOEventTypes.Connect, (socket, packet, args) => SetUserName());
@@ -60,7 +67,7 @@ void OnServerUpdate(Socket socket, Packet packet, params object[] args)
 
 ```
 
-### send data
+### Send data
 ```Unity/csharp
  IEnumerator SendFrame(float waitTime)
     {
@@ -86,8 +93,8 @@ void OnServerUpdate(Socket socket, Packet packet, params object[] args)
     }
 ```
 
-### package
-Package in to an exe. OSX and Linux are available but need to be configures in package.json
+### Package
+Package in to an exe. OSX and Linux are available but need to be configured in package.json
 
 `$ pkg .`
 
