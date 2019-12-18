@@ -20,7 +20,13 @@ and then run, configure and manage the service just as you would any other servi
 ### Port configuration
 The Socket.io port defaults to `3000` and the TCP Socket port defaults to `4000`. You can customize these with the `$SOCKET_IO_PORT` and `$TCP_SOCKET_PORT` environment variables, respectively.
 
-### Initialization
+## Logs
+You can view server logs by navigating to `/logs` from a client. The log files themselves are stored in the `/logs` folder on the server.
+
+## Crash test
+You can purposefully crash the server by navigating to `/iamsurethatiwanttocrashtheserver` from a client.
+
+### Client Initialization
 Example in Unity/C\#:
 
 ```Unity/csharp
@@ -33,7 +39,7 @@ Manager.Socket.On("chatMessage", OnChatMessage);
 Manager.Open();
 ```
 
-### Handlers
+### Client Handlers
 Example in Unity/C\#:
 
 ```Unity/csharp
@@ -74,7 +80,7 @@ void OnServerUpdate(Socket socket, Packet packet, params object[] args)
 
 ```
 
-### Send data
+### Send data from client
 Example in Unity/C\#:
 
 ```Unity/csharp
