@@ -16,6 +16,8 @@ and then run, configure and manage the service just as you would any other servi
 
     $ npm run uninstall-windows-service
 
+To test crashing behavior with the service running, see "Crash test" below.
+
 ## Usage
 ### Port configuration
 The Socket.io port defaults to `3000` and the TCP Socket port defaults to `4000`. You can customize these with the `$SOCKET_IO_PORT` and `$TCP_SOCKET_PORT` environment variables, respectively.
