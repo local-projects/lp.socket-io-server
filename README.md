@@ -49,36 +49,36 @@ Manager.Socket.On(SocketIOEventTypes.Error, (socket, packet, args) => Debug.LogE
 Manager.Socket.On(SocketIOEventTypes.Connect, (socket, packet, args) => SetUserName());
 
 void OnServerUpdate(Socket socket, Packet packet, params object[] args)
-        {
-            Dictionary<string, object> data = args[0] as Dictionary<string, object>;
+{
+    Dictionary<string, object> data = args[0] as Dictionary<string, object>;
 
-            string response = "got OnServerUpdate"
-                + " type " + data["type"]
-                + " who " + data["username"]
-                + " room " + data["room"]
-                + " rooms " + (data["rooms"] as List<object>)[0] as string
-                + " users " + (data["users"] as Dictionary<string, object>).Count
-                + " \n";
+    string response = "got OnServerUpdate"
+        + " type " + data["type"]
+        + " who " + data["username"]
+        + " room " + data["room"]
+        + " rooms " + (data["rooms"] as List<object>)[0] as string
+        + " users " + (data["users"] as Dictionary<string, object>).Count
+        + " \n";
 
-            Debug.Log(response);
-        }
+    Debug.Log(response);
+}
 
-        void OnChatMessage(Socket socket, Packet packet, params object[] args)
-        {
-            Dictionary<string, object> data = args[0] as Dictionary<string, object>;
+void OnChatMessage(Socket socket, Packet packet, params object[] args)
+{
+    Dictionary<string, object> data = args[0] as Dictionary<string, object>;
 
-            string response = "got chat"
-                + " who " + data["username"]
-                + " data " + data["data"]
-                + " \n";
+    string response = "got chat"
+        + " who " + data["username"]
+        + " data " + data["data"]
+        + " \n";
 
-            Debug.Log(response);
-        }
+    Debug.Log(response);
+}
         
-          void SetUserName()
-    {
-        Manager.Socket.Emit("adduser", NodeName, NodeRoom);
-    }
+void SetUserName()
+{
+    Manager.Socket.Emit("adduser", NodeName, NodeRoom);
+}
 
 ```
 
@@ -86,28 +86,28 @@ void OnServerUpdate(Socket socket, Packet packet, params object[] args)
 Example in Unity/C\#:
 
 ```Unity/csharp
- IEnumerator SendFrame(float waitTime)
-    {
-        while (DoSendFrameData) { 
-            yield return new WaitForSeconds(waitTime);
+IEnumerator SendFrame(float waitTime)
+{
+    while (DoSendFrameData) { 
+        yield return new WaitForSeconds(waitTime);
 
-            if (framedataListLocal.Count > 0)
+        if (framedataListLocal.Count > 0)
+        {
+            framedataListToSend.Clear();
+            foreach (KeyValuePair<string, GameObject> attachStat in framedataListLocal)
             {
-                framedataListToSend.Clear();
-                foreach (KeyValuePair<string, GameObject> attachStat in framedataListLocal)
-                {
-                    List<string> position = new List<string>();
-                    position.Add(attachStat.Value.transform.position.x.ToString());
-                    position.Add(attachStat.Value.transform.position.y.ToString());
-                    position.Add(attachStat.Value.transform.position.z.ToString());
-                    framedataListToSend[attachStat.Key] = position;
-                }
-
-                SocketCommunicationManager.Instance.Manager.Socket.Emit("sendmessage", "frameData", framedataListToSend);
-                //Debug.Log("sending");
+                List<string> position = new List<string>();
+                position.Add(attachStat.Value.transform.position.x.ToString());
+                position.Add(attachStat.Value.transform.position.y.ToString());
+                position.Add(attachStat.Value.transform.position.z.ToString());
+                framedataListToSend[attachStat.Key] = position;
             }
+
+            SocketCommunicationManager.Instance.Manager.Socket.Emit("sendmessage", "frameData", framedataListToSend);
+            //Debug.Log("sending");
         }
     }
+}
 ```
 
 ### Packaging
