@@ -42,7 +42,11 @@ var tcp_socket_server = net.createServer(socket => {
     socket.on("data", cmd => {
         log(
             "command received on tcp socket: " +
-                (cmd.length < 20 ? cmd : cmd.slice(0, 20) + "...")
+                (cmd
+                    ? cmd.length < 20
+                        ? cmd
+                        : cmd.slice(0, 20) + "..."
+                    : "NO COMMAND RECEIVED")
         ); // truncate cmd if very long
 
         log("broadcasting command to all socket.io clients...");
@@ -155,8 +159,23 @@ io.sockets.on("connection", function(socket) {
         );
         log("Message");
         log("-------");
-        log("cmd: " + cmd);
-        log("data: " + (data.length < 20 ? data : data.slice(0, 20) + "...")); // truncate data if very long
+        log(
+            "cmd: " +
+                (cmd
+                    ? cmd.length < 20
+                        ? cmd
+                        : cmd.slice(0, 20) + "..."
+                    : "NO COMMAND RECEIVED")
+        ); // truncate cmd if very long
+
+        log(
+            "data: " +
+                (data
+                    ? data.length < 20
+                        ? data
+                        : data.slice(0, 20) + "..."
+                    : "NO DATA RECEIVED WITH COMMAND")
+        ); // truncate data if very long
 
         socket.broadcast.to(socket.room).emit(cmd, {
             username: socket.username,
