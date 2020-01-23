@@ -124,6 +124,14 @@ io.sockets.on("connection", function(socket) {
     });
 
     socket.on("adduser", function(username, room) {
+        // Hack to work with clients that can't send
+        // multiple parameters
+        if (username.includes("|")) {
+            var split = username.split("|");
+            username = split[0];
+            room = split[1];
+        }
+
         log("add user: " + username + ", " + room);
         socket.username = username;
         socket.join(room, function(err) {
