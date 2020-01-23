@@ -4,16 +4,13 @@
         <script src="/socket.io/socket.io.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
         <script>
-            var socket = io.connect("http://localhost:3000");
+            var socket = io.connect(window.location.host);
             var logfile = "log.txt";
             var bScrollToBottom = true;
 
             socket.on("connect", function() {
                 socket.emit("addlogwatcher");
-                loadLogs();
             });
-
-            socket.on("newlog", loadLogs);
 
             function loadLogs() {
                 $.ajax({
@@ -37,6 +34,10 @@
 
             // on load of page
             $(function() {
+                loadLogs();
+
+                socket.on("newlog", loadLogs); // reload every time there's a new log
+
                 // Switch between current session and all sessions
                 $("#switchLink").click(function() {
                     if (logfile === "log.txt") {
