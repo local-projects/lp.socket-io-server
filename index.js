@@ -168,14 +168,19 @@ io.sockets.on("connection", function(socket) {
                     : "NO COMMAND RECEIVED")
         ); // truncate cmd if very long
 
-        log(
-            "data: " +
-                (data
-                    ? data.length < 20
-                        ? data
-                        : data.slice(0, 20) + "..."
-                    : "NO DATA RECEIVED WITH COMMAND")
-        ); // truncate data if very long
+        if (data) {
+            if (typeof data !== "string") {
+                log("data: [non-string value]");
+                console.log(data);
+            } else {
+                log(
+                    "data: " +
+                        (data.length < 100 ? data : data.slice(0, 100) + "...")
+                ); // truncate data if very long
+            }
+        } else {
+            log("data: [none]");
+        }
 
         socket.broadcast.to(socket.room).emit(cmd, {
             username: socket.username,
